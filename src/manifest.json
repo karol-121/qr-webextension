@@ -1,0 +1,35 @@
+{
+	"name": "Qr",
+	"description": "Generate qr code for current tab",
+	"manifest_version": 2,
+	"version": "0.1",
+
+ 	"permissions": 
+ 	[
+  	"find",
+  	"tabs"
+	],
+
+	"icons": 
+	{
+		"48": "icons/icon-48.png"
+	},
+
+	"background": 
+	{
+		"scripts":
+		[
+			"background.js"
+		]
+	},
+
+	"page_action": 
+	{
+  	"default_icon": "icons/page_action-32.png",
+  	"default_title": "QR",
+  	"show_matches": ["<all_urls>"],
+  	"default_popup": "popup/popup.html"
+  	
+	}
+
+}
