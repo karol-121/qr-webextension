@@ -25,8 +25,8 @@
 
 	"page_action": 
 	{
-  	"default_icon": "icons/page_action-32.png",
-  	"default_title": "QR",
+  	"default_icon": "icons/page_action-32.svg",
+  	"default_title": "Generate QR code for this page",
   	"show_matches": ["<all_urls>"],
   	"default_popup": "popup/popup.html"
   	

@@ -5,17 +5,16 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title></title>
 	<style>
+
 		img {
-			width: 150px;
-			height: 150px;
+			display: block;
 		}
 		.zoom-normal {
 			cursor: zoom-in;
 		}
 
 		.zoom-2x {
-			width: 300px;
-			height: 300px;
+			transform: scale(2.0);
 			cursor: zoom-out;
 		}
 
@@ -25,7 +24,7 @@
 	</style>
 </head>
 <body>
-	<img class="zoom-normal" id="qr" src=""/>
+	<img width="150" height="150" id="qr" src=""/>
 	<script type="text/javascript" src="popup.js"></script>
 </body>
 </html>
