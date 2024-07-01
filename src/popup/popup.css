@@ -1,0 +1,8 @@
+body {
+	font-family: arial;
+}
+
+small {
+	display: block;
+	max-width: 230px;
+}

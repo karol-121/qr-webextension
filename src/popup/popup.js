@@ -1,3 +1,10 @@
+const messages = {
+	error_default: "Something went wrong.",
+	error_long: "Link is too long. Shorten it and then try again.",
+	warning_difficulties: "Link length is not optimal. You may experience difficulties while scanning.",
+	success_alt: "QR code for current tab" 
+}
+
 //representation of qr code dom element
 const qr_object = {
 	dom_element: document.getElementById('qr'),
@@ -22,12 +29,12 @@ browser.runtime.sendMessage({request: "getCurrentURL"}).then(resolve, onError);
 function resolve(response) {
 	//verify that link exist or is not empty
 	if (!response) {
-		onError("Response is either undefined or is empty string", "Something went wrong :(");
+		onError("Response is either undefined or is an empty string", messages.error_default);
 		return;
 	}
 
 	if (response.length >= 280) {
-		onError("Link is too long", "Link is too long. Shorten it and then try again.");
+		onError("Response exceeds 280 chars", messages.error_long);
 		return;
 	}
 
@@ -37,16 +44,16 @@ function resolve(response) {
 	//at this point the link should be valid and size of the qr code set
 	//proceed to create qr code and print it
 
-	//todo: add information to the user when qr code is bigger than level 4 as they may be difficult to scan
 
 	const api_url = createURL(response, defined_size);
 
 	qr_object.url = api_url;
-	qr_object.alt = "QR code for current tab";
+	qr_object.alt = messages.success_alt;
 	qr_object.size = defined_size;
 
+	//notify user about difficulties related to size being bigger than qr code level 4
 	if (defined_size >= 33 * 7) {
-		qr_object.subtitle = "Link length is not optimal. You may experience difficulties with scanning."
+		qr_object.subtitle = messages.warning_difficulties;
 	}
 
 	qr_object.print();
@@ -54,7 +61,7 @@ function resolve(response) {
 
 //function that handles negative response for request
 function onError(error, message) {
-	qr_object.alt = (!message) ? "Something went wrong" : message;
+	qr_object.alt = (!message) ? messages.error_default : message;
 	qr_object.print();
 	console.log(error);
 }
