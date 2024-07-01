@@ -1,14 +1,17 @@
 //representation of qr code dom element
 const qr_object = {
 	dom_element: document.getElementById('qr'),
+	dom_subtitle: document.getElementById('subtitle'),
 	url: "",
 	alt: "",
 	size: "",
+	subtitle: "",
 	print: function () {
 		this.dom_element.src = this.url;
 		this.dom_element.alt = this.alt;
 		this.dom_element.width = this.size;
 		this.dom_element.height = this.size;
+		this.dom_subtitle.innerText = this.subtitle;
 	}
 }
 
@@ -23,23 +26,28 @@ function resolve(response) {
 		return;
 	}
 
-	//match size of the qr code according to link length
-	const defined_size = defineSize(response);
-
-	//check if link length does not exceed maximum
-	if (defined_size === -1) {
-		onError("Link is too long", "Link is too long :(");
+	if (response.length >= 280) {
+		onError("Link is too long", "Link is too long. Shorten it and then try again.");
 		return;
 	}
 
+	//match size of the qr code according to link length
+	const defined_size = defineSize(response);
+
 	//at this point the link should be valid and size of the qr code set
 	//proceed to create qr code and print it
+
+	//todo: add information to the user when qr code is bigger than level 4 as they may be difficult to scan
 
 	const api_url = createURL(response, defined_size);
 
 	qr_object.url = api_url;
 	qr_object.alt = "QR code for current tab";
 	qr_object.size = defined_size;
+
+	if (defined_size >= 33 * 7) {
+		qr_object.subtitle = "Link length is not optimal. You may experience difficulties with scanning."
+	}
 
 	qr_object.print();
 }
@@ -60,31 +68,34 @@ function defineSize(url) {
 		2 - 25 modules, 47 alphanumeric
 		3 - 29 modules, 77 alphanumeric
 		4 - 33 modules, 114 alphanumeric
+		5 - 37 modules, 154 alphanumeric
+		6 - 41 modules, 195 alphanumeric
+		7 - 45 modules, 224 alphanumeric
+		8 - 49 modules, 279 alphanumeric
 		*given ecc level low
 	*/
 
 	//size chart for qr code based on amount of data
-	//the size of qr code level 2 and 4 are adjusted to look better
-	const sizes = [[25, 21],[47, 29],[77, 29],[114, 37]];
+	const sizes = [[25, 21], [47, 25], [77, 29], [114, 33], [154, 37], [195, 41], [224, 45], [279, 49]];
 
 	for (size of sizes) {
 		if (url.length <= size[0]) {
-			return size[1] * 10;
+			return size[1] * 7;
 		}
 	}
 
-	//here we have to address links that are longer than 114 chars
-	//we could try to trim it and then try to define size again
-	//if this fail then we can print error about link being too long
+	//todo: possibly try to shorten links that exceeds what is defined in size chart
 
-	return -1;
+	//return the last defined size for links that are longer that what is defined in size chart
+	//todo: test this:
+	return sizes[sizes.length -1][1] * 7;
 }
 
 //function that creates url for qr code
 function createURL(url, size) {
 	const api_url = new URL("https://api.qrserver.com/v1/create-qr-code/");
 	api_url.searchParams.append("size", size + "x" + size);
-	api_url.searchParams.append("format", "svg");
+	api_url.searchParams.append("format", "png");
 	api_url.searchParams.append("data", url);
 	return api_url;
 }
