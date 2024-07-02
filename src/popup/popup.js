@@ -44,7 +44,6 @@ function resolve(response) {
 	//at this point the link should be valid and size of the qr code set
 	//proceed to create qr code and print it
 
-
 	const api_url = createURL(response, defined_size);
 
 	qr_object.url = api_url;
@@ -62,6 +61,7 @@ function resolve(response) {
 //function that handles negative response for request
 function onError(error, message) {
 	qr_object.alt = (!message) ? messages.error_default : message;
+	qr_object.src = "";
 	qr_object.print();
 	console.log(error);
 }
@@ -83,7 +83,16 @@ function defineSize(url) {
 	*/
 
 	//size chart for qr code based on amount of data
-	const sizes = [[25, 21], [47, 25], [77, 29], [114, 33], [154, 37], [195, 41], [224, 45], [279, 49]];
+	const sizes = [
+		[25, 21], 
+		[47, 25], 
+		[77, 29], 
+		[114, 33], 
+		[154, 37], 
+		[195, 41], 
+		[224, 45], 
+		[279, 49]
+	];
 
 	for (size of sizes) {
 		if (url.length <= size[0]) {
