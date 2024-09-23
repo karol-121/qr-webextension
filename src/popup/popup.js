@@ -1,8 +1,8 @@
-const messages = {
+const MESSAGES = {
 	error_default: "Something went wrong.",
-	error_long: "Link is too long. Shorten it and then try again.",
-	warning_difficulties: "Link length is not optimal. You may experience difficulties while scanning.",
-	success_alt: "QR code for current tab" 
+	error_isTooLong: "Link is too long. Shorten it and then try again.",
+	warning_isLong: "Link length is not optimal. You may experience difficulties while scanning.",
+	default_alt: "QR code for current tab"
 }
 
 //representation of qr code dom element
@@ -29,16 +29,17 @@ browser.runtime.sendMessage({request: "getCurrentURL"}).then(resolve, onError);
 function resolve(response) {
 	//verify that link exist or is not empty
 	if (!response) {
-		onError("Response is either undefined or is an empty string", messages.error_default);
+		onError("Response is either undefined or is an empty string", MESSAGES.error_default);
 		return;
 	}
 
 	if (response.length >= 280) {
-		onError("Response exceeds 280 chars", messages.error_long);
+		onError("Response exceeds 280 chars", MESSAGES.error_isTooLong);
 		return;
 	}
 
 	//match size of the qr code according to link length
+	//this is so the qr code is always the right size. (longer link requires bigger qr code size.)
 	const defined_size = defineSize(response);
 
 	//at this point the link should be valid and size of the qr code set
@@ -47,12 +48,12 @@ function resolve(response) {
 	const api_url = createURL(response, defined_size);
 
 	qr_object.url = api_url;
-	qr_object.alt = messages.success_alt;
-	qr_object.size = defined_size;
+	qr_object.alt = MESSAGES.default_alt //todo: ideally this should inform if there is error on qr api side.
+	qr_object.size = defined_size.size;
 
 	//notify user about difficulties related to size being bigger than qr code level 4
-	if (defined_size >= 33 * 7) {
-		qr_object.subtitle = messages.warning_difficulties;
+	if (defined_size.isLong) {
+		qr_object.subtitle = MESSAGES.warning_isLong;
 	}
 
 	qr_object.print();
@@ -60,7 +61,7 @@ function resolve(response) {
 
 //function that handles negative response for request
 function onError(error, message) {
-	qr_object.alt = (!message) ? messages.error_default : message;
+	qr_object.alt = (!message) ? MESSAGES.error_default : message;
 	qr_object.src = "";
 	qr_object.print();
 	console.log(error);
@@ -94,17 +95,32 @@ function defineSize(url) {
 		[279, 49]
 	];
 
+	const zoom_factor = 7;
+
+	//todo: reverse the logic below to eliminate defining the default response. It should be defining on the fly?
+
+	//defining default response
+	const result = {
+		//todo: test this below (if the default zoom factor is correct)
+		size: sizes[sizes.length -1][1] * zoom_factor, //use last defined size from sizes as default
+		isLong: true
+	}
+
+	//updating the default response
 	for (size of sizes) {
 		if (url.length <= size[0]) {
-			return size[1] * 7;
+			result.size = size[1] * zoom_factor;
+			break;
 		}
 	}
 
-	//todo: possibly try to shorten links that exceeds what is defined in size chart
+	//check if resulted size is below qr code level 4
+	//if so, update the default response accordingly
+	if (result.size < sizes[3][1] * zoom_factor) {
+		result.isLong = false;
+	}
 
-	//return the last defined size for links that are longer that what is defined in size chart
-	//todo: test this:
-	return sizes[sizes.length -1][1] * 7;
+	return result;
 }
 
 //function that creates url for qr code
