@@ -48,6 +48,9 @@ function resolve(response) {
 	const api_url = createURL(response, defined_size);
 
 	qr_object.url = api_url;
+
+	console.log(api_url);
+
 	qr_object.alt = MESSAGES.default_alt //todo: ideally this should inform if there is error on qr api side.
 	qr_object.size = defined_size.size;
 
@@ -124,9 +127,9 @@ function defineSize(url) {
 }
 
 //function that creates url for qr code
-function createURL(url, size) {
+function createURL(url, sizeData) {
 	const api_url = new URL("https://api.qrserver.com/v1/create-qr-code/");
-	api_url.searchParams.append("size", size + "x" + size);
+	api_url.searchParams.append("size", sizeData.size + "x" + sizeData.size);
 	api_url.searchParams.append("format", "png");
 	api_url.searchParams.append("data", url);
 	return api_url;
