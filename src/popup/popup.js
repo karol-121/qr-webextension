@@ -14,13 +14,21 @@ const qr_object = {
 	size: "",
 	subtitle: "",
 	print: function () {
-		this.dom_element.src = this.url;
+		//prevents loop from bad img error
+		//todo: do this for all the attributes
+		if (this.dom_element.src != this.url) {
+			this.dom_element.src = this.url;	
+		}
 		this.dom_element.alt = this.alt;
 		this.dom_element.width = this.size;
 		this.dom_element.height = this.size;
 		this.dom_subtitle.innerText = this.subtitle;
-	}
+	},
 }
+
+//assigning function that will handle error of bad image 
+qr_object.dom_element.addEventListener("error", onBadImgSrc);
+
 
 //get url of current tab by sending an request to background script
 browser.runtime.sendMessage({request: "getCurrentURL"}).then(resolve, onError);
@@ -42,16 +50,10 @@ function resolve(response) {
 	//this is so the qr code is always the right size. (longer link requires bigger qr code size.)
 	const defined_size = defineSize(response);
 
-	//at this point the link should be valid and size of the qr code set
-	//proceed to create qr code and print it
-
 	const api_url = createURL(response, defined_size);
 
 	qr_object.url = api_url;
-
-	console.log(api_url);
-
-	qr_object.alt = MESSAGES.default_alt //todo: ideally this should inform if there is error on qr api side.
+	qr_object.alt = MESSAGES.default_alt
 	qr_object.size = defined_size.size;
 
 	//notify user about difficulties related to size being bigger than qr code level 4
@@ -135,5 +137,18 @@ function createURL(url, sizeData) {
 	return api_url;
 }
 
+
+//function that handles bad img error
+function onBadImgSrc(error) {
+
+	console.log(error);
+
+	qr_object.alt = MESSAGES.error_default;
+	qr_object.size = 0;
+	qr_object.subtitle = ""; 
+
+	qr_object.print();
+
+}
 
 
