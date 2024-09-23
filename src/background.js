@@ -1,10 +1,10 @@
 browser.runtime.onMessage.addListener(recieveMessage);
 
 function recieveMessage(request) {
-	//todo: add check for request
-	return getCurrentURL();
+	if (request.request === "getCurrentURL") {
+		return getCurrentURL();	
+	}
 }
-
 
 async function getCurrentURL() {
 	const currentTab = await browser.tabs.query({currentWindow: true, active: true});
