@@ -10,5 +10,3 @@ async function getCurrentURL() {
 	const currentTab = await browser.tabs.query({currentWindow: true, active: true});
 	return currentTab[0].url;
 }
-
-

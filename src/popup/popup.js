@@ -13,12 +13,15 @@ const qr_object = {
 	alt: "",
 	size: "",
 	subtitle: "",
+
 	print: function () {
-		//prevents loop from bad img error
-		//todo: do this for all the attributes
-		if (this.dom_element.src != this.url) {
+		
+		//update only if src value has changed and is not ""
+		//this prevents loop from bad src error event
+		if (this.dom_element.src != this.url && this.url) {
 			this.dom_element.src = this.url;	
 		}
+
 		this.dom_element.alt = this.alt;
 		this.dom_element.width = this.size;
 		this.dom_element.height = this.size;
@@ -26,9 +29,10 @@ const qr_object = {
 	},
 }
 
-//assigning function that will handle error of bad image 
-qr_object.dom_element.addEventListener("error", onBadImgSrc);
-
+//assigning error handling function to deal with bad img errors
+qr_object.dom_element.addEventListener("error", (error) => {
+	onError(error, MESSAGES.error_default);
+});
 
 //get url of current tab by sending an request to background script
 browser.runtime.sendMessage({request: "getCurrentURL"}).then(resolve, onError);
@@ -64,12 +68,17 @@ function resolve(response) {
 	qr_object.print();
 }
 
-//function that handles negative response for request
+//function that handles errors
 function onError(error, message) {
-	qr_object.alt = (!message) ? MESSAGES.error_default : message;
-	qr_object.src = "";
-	qr_object.print();
 	console.log(error);
+	const errorMessage = (!message) ? MESSAGES.error_default : message;
+	
+	qr_object.url = browser.runtime.getURL("assets/error.png");
+	qr_object.alt = errorMessage;
+	qr_object.size = 147; //todo: define it as an constant
+	qr_object.subtitle = errorMessage;
+	
+	qr_object.print();
 }
 
 function defineSize(url) {
@@ -135,20 +144,6 @@ function createURL(url, sizeData) {
 	api_url.searchParams.append("format", "png");
 	api_url.searchParams.append("data", url);
 	return api_url;
-}
-
-
-//function that handles bad img error
-function onBadImgSrc(error) {
-
-	console.log(error);
-
-	qr_object.alt = MESSAGES.error_default;
-	qr_object.size = 0;
-	qr_object.subtitle = ""; 
-
-	qr_object.print();
-
 }
 
 
