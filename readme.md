@@ -28,7 +28,7 @@ Longer links will generate QR codes of suboptimal size that may lead to difficul
 
 
 ## Installation
-Available for Firefox via: (not available yet)
+Available for Firefox via: https://addons.mozilla.org/en-US/firefox/addon/qr-codes/
 
 In addition you may also install it as local debug install. **Note that you will have to install it every time you open the browser**
 - [Installing extension locally](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Your_first_WebExtension#installing)
