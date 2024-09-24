@@ -16,7 +16,7 @@ const qr_object = {
 
 	print: function () {
 		
-		//update only if src value has changed and is not ""
+		//update only if src value has changed and is not empty
 		//this prevents loop from bad src error event
 		if (this.dom_element.src != this.url && this.url) {
 			this.dom_element.src = this.url;	
@@ -75,12 +75,14 @@ function onError(error, message) {
 	
 	qr_object.url = browser.runtime.getURL("assets/error.png");
 	qr_object.alt = errorMessage;
-	qr_object.size = 147; //todo: define it as an constant
+	qr_object.size = 147;
 	qr_object.subtitle = errorMessage;
 	
 	qr_object.print();
 }
 
+//function that defines size the qr code should be.
+//Note that the longer the link is, the bigger qr code has to be
 function defineSize(url) {
 	//good practice: keep size of the qr code up to level 4
 	//any bigger qr code may be difficult for the phones to scan
@@ -111,11 +113,8 @@ function defineSize(url) {
 
 	const zoom_factor = 7;
 
-	//todo: reverse the logic below to eliminate defining the default response. It should be defining on the fly?
-
 	//defining default response
 	const result = {
-		//todo: test this below (if the default zoom factor is correct)
 		size: sizes[sizes.length -1][1] * zoom_factor, //use last defined size from sizes as default
 		isLong: true
 	}
