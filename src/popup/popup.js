@@ -1,7 +1,7 @@
 const MESSAGES = {
 	error_default: "Something went wrong.",
 	error_isTooLong: "Link is too long. Shorten it and then try again.",
-	warning_isLong: "Link length is not optimal. You may experience difficulties while scanning.",
+	warning_isLong: "Link is long. You may experience difficulties while scanning.",
 	default_alt: "QR code for current tab"
 }
 
@@ -34,29 +34,27 @@ qr_object.dom_element.addEventListener("error", (error) => {
 	onError(error, MESSAGES.error_default);
 });
 
-//get url of current tab by sending an request to background script
-browser.runtime.sendMessage({request: "getCurrentURL"}).then(resolve, onError);
+//get url of the current tab by sending an request to background script
+browser.runtime.sendMessage({type: "getCurrentURL"}).then(resolve, onError);
 
 //function that handles positive response for request
-function resolve(response) {
-	//verify that link exist or is not empty
-	if (!response) {
-		onError("Response is either undefined or is an empty string", MESSAGES.error_default);
+function resolve(tab_url) {
+	//verify that url exist or is not empty
+	if (!tab_url) {
+		onError("Tab url is either undefined or is an empty string", MESSAGES.error_default);
 		return;
 	}
 
-	if (response.length >= 280) {
-		onError("Response exceeds 280 chars", MESSAGES.error_isTooLong);
+	if (tab_url.length >= 280) {
+		onError("tab url exceeds 280 chars", MESSAGES.error_isTooLong);
 		return;
 	}
 
 	//match size of the qr code according to link length
 	//this is so the qr code is always the right size. (longer link requires bigger qr code size.)
-	const defined_size = defineSize(response);
+	const defined_size = defineSize(tab_url);
 
-	const api_url = createURL(response, defined_size);
-
-	qr_object.url = api_url;
+	qr_object.url = composeURL(tab_url, defined_size);
 	qr_object.alt = MESSAGES.default_alt
 	qr_object.size = defined_size.size;
 
@@ -71,12 +69,12 @@ function resolve(response) {
 //function that handles errors
 function onError(error, message) {
 	console.log(error);
-	const errorMessage = (!message) ? MESSAGES.error_default : message;
+	const error_message = (!message) ? MESSAGES.error_default : message;
 	
 	qr_object.url = browser.runtime.getURL("assets/error.png");
-	qr_object.alt = errorMessage;
+	qr_object.alt = error_message;
 	qr_object.size = 147;
-	qr_object.subtitle = errorMessage;
+	qr_object.subtitle = error_message;
 	
 	qr_object.print();
 }
@@ -137,9 +135,9 @@ function defineSize(url) {
 }
 
 //function that creates url for qr code
-function createURL(url, sizeData) {
+function composeURL(url, size_data) {
 	const api_url = new URL("https://api.qrserver.com/v1/create-qr-code/");
-	api_url.searchParams.append("size", sizeData.size + "x" + sizeData.size);
+	api_url.searchParams.append("size", size_data.size + "x" + size_data.size);
 	api_url.searchParams.append("format", "png");
 	api_url.searchParams.append("data", url);
 	return api_url;

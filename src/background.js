@@ -1,7 +1,7 @@
 browser.runtime.onMessage.addListener(recieveMessage);
 
 function recieveMessage(request) {
-	if (request.request === "getCurrentURL") {
+	if (request.type === "getCurrentURL") {
 		return getCurrentURL();	
 	}
 }
